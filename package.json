@@ -1,12 +1,14 @@
 {
   "name": "app",
   "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
-  },
+ "scripts": {
+  "dev": "next dev",
+  "build": "next build",
+  "start": "next start",
+  "lint": "next lint",
+  "vercel-build": "next build --no-lint"
+},
+
   "prisma": {
     "seed": "tsx --require dotenv/config scripts/seed.ts"
   },
