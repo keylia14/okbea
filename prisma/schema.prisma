@@ -1,0 +1,88 @@
+generator client {
+    provider = "prisma-client-js"
+    binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+    output = "/home/ubuntu/okbea_ai/nextjs_space/node_modules/.prisma/client"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 Int           @id @default(autoincrement())
+  username           String        @unique
+  email              String?
+  passwordHash       String
+  createdAt          DateTime      @default(now())
+  metaAccessToken    String?
+  metaAdAccountId    String?
+  campaigns          Campaign[]
+  adCampaigns        AdCampaign[]
+}
+
+model Campaign {
+  id               Int          @id @default(autoincrement())
+  userId           Int
+  name             String
+  affiliateNetwork String
+  productName      String
+  originalUrl      String
+  shortCode        String       @unique
+  createdAt        DateTime     @default(now())
+  user             User         @relation(fields: [userId], references: [id])
+  clicks           Click[]
+  conversions      Conversion[]
+}
+
+model Click {
+  id         Int      @id @default(autoincrement())
+  campaignId Int
+  referrer   String?
+  userAgent  String?
+  clickedAt  DateTime @default(now())
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+}
+
+model Conversion {
+  id          Int      @id @default(autoincrement())
+  campaignId  Int
+  revenue     Float
+  notes       String?
+  convertedAt DateTime @default(now())
+  campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+}
+
+model AdCampaign {
+  id                Int             @id @default(autoincrement())
+  userId            Int
+  name              String
+  metaCampaignId    String?         @unique
+  status            String          @default("DRAFT")
+  platform          String          @default("META")
+  productName       String
+  productUrl        String
+  affiliateLink     String
+  dailyBudget       Float
+  targetAudience    String?
+  adCopy            String?
+  adHeadline        String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  performance       AdPerformance[]
+}
+
+model AdPerformance {
+  id            Int        @id @default(autoincrement())
+  adCampaignId  Int
+  date          DateTime   @default(now())
+  impressions   Int        @default(0)
+  clicks        Int        @default(0)
+  spend         Float      @default(0)
+  conversions   Int        @default(0)
+  revenue       Float      @default(0)
+  adCampaign    AdCampaign @relation(fields: [adCampaignId], references: [id], onDelete: Cascade)
+  
+  @@unique([adCampaignId, date])
+}
